@@ -1,0 +1,60 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>ESP8266 WebSocket</title>
+	</head>
+	<body>
+		<div> Webscoket status 
+			<span id="status" style="font-weight: bold;"> disconnected </span>
+		</div>
+        <div>
+            Sensor Value:
+            <span id="sensor-value">--</span>
+          </div>
+		<div> Control LED 
+			<input type="checkbox" id="led" name="led"  />
+		</div>
+        
+		<script type="text/javascript">
+            var button = document.getElementById('btn');
+            var led = document.getElementById('led');
+            var url = window.location.host; // hàm trả về url của trang hiện tại kèm theo port
+            var sensorValueSpan = document.getElementById('sensor-value');
+            var ws = new WebSocket('ws://' + url + '/ws'); // mở 1 websocket với port 8000
+            console.log('connecting...')
+            
+            ws.onopen = function() //khi websocket được mở thì hàm này sẽ được thưc hiện
+            {
+                document.getElementById('status').innerHTML = 'Connected';
+                 //khi websocket được mở, mới cho phép
+                console.log('connected...')
+            };
+            ws.onmessage = function(evt) // sự kiện xảy ra khi client nhận dữ liệu từ server
+            {
+                console.log(evt.data)
+                var data = JSON.parse(evt.data);
+                if (data.hasOwnProperty("sensorValue")) {
+                    sensorValueSpan.innerText = data.sensorValue; // Update sensor value
+                }
+                if (data.hasOwnProperty("ledStatus")) { // Kiểm tra xem trạng thái LED có được gửi từ server hay không
+                    if (data.ledStatus == 'LED_OFF') {
+                        led.checked = false; // Nếu trạng thái LED là 'LED_OFF', tắt đèn LED
+                    } else if (data.ledStatus == 'LED_ON') {
+                        led.checked = true; // Nếu trạng thái LED là 'LED_ON', bật đèn LED
+                    }
+                }
+            }
+            ws.onclose = function() { // hàm này sẽ được thực hiện khi đóng websocket
+                led.disabled = true;
+                document.getElementById('status').innerHTML = 'Connected';
+            };
+            led.onchange = function() { // thực hiện thay đổi bật/tắt led
+                var led_status = 'LED_OFF';
+                if (led.checked) {
+                    led_status = 'LED_ON';
+                }
+                ws.send(led_status)
+            }
+            </script>
+	</body>
+</html>

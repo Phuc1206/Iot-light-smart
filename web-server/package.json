@@ -1,0 +1,32 @@
+{
+  "name": "iot-smart-light",
+  "version": "1.0.0",
+  "description": "Iot, Light, Smart Light",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --inspect src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Phuc1206/Iot_Smart_Light.git"
+  },
+  "keywords": [
+    "Cuoi",
+    "ky",
+    "Iot"
+  ],
+  "author": "nhom 1",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Phuc1206/Iot_Smart_Light/issues"
+  },
+  "homepage": "https://github.com/Phuc1206/Iot_Smart_Light#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "express-ws": "^5.0.2"
+  }
+}
