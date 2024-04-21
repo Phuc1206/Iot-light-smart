@@ -51,13 +51,25 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> {
 
                 button.setOnClickListener(v -> {
-                    if (button.isChecked()) {
-                        ws.send("LED_ON");
-                    } else {
-                        ws.send("LED_OFF");
+                    JSONObject jsonObject = new JSONObject();
+                    try {
+                        // Put the LED status in the JSONObject
+                        if (button.isChecked()) {
+                            jsonObject.put("ledStatus", "LED_ON_PK");
+                        } else {
+                            jsonObject.put("ledStatus", "LED_OFF_PK");
+                        }
+
+                        // Convert the JSONObject to a string
+                        String jsonString = jsonObject.toString();
+
+                        // Send the JSON string
+                        ws.send(jsonString);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
+                    Toast.makeText(MainActivity.this, "Connected to the server", Toast.LENGTH_SHORT).show();
                 });
-                Toast.makeText(MainActivity.this, "Connected to the server", Toast.LENGTH_SHORT).show();
             });
         }
 
@@ -70,9 +82,9 @@ public class MainActivity extends AppCompatActivity {
                         sensorValue.setText(jsonObject.getString("sensorValue"));
                     }
                     if (jsonObject.has("ledStatus")) { // Kiểm tra xem trạng thái LED có được gửi từ server hay không
-                        if ("LED_ON".equals(jsonObject.getString("ledStatus"))) {
+                        if ("LED_ON_PK".equals(jsonObject.getString("ledStatus"))) {
                             button.setChecked(true); // Nếu trạng thái LED là 'LED_ON', bật đèn LED
-                        } else if ("LED_OFF".equals(jsonObject.getString("ledStatus"))) {
+                        } else if ("LED_OFF_PK".equals(jsonObject.getString("ledStatus"))) {
                             button.setChecked(false); // Nếu trạng thái LED là 'LED_OFF', tắt đèn LED
                         }
                     }

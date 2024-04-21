@@ -125,19 +125,54 @@
 		<div> Control LED Phòng Khách
 			<input type="checkbox" id="led-pk" name="led"  />
 		</div>
-        <div> Control LED Phòng Ngủ
+        <!-- <div> Control LED Phòng Ngủ
 			<input type="checkbox" id="led-pn" name="led"  />
+		</div> -->
+    <div> Control LED Ngoài Nhà
+			<input type="checkbox" id="led-nn" name="led"  />
 		</div>
-        <label class="switch">
+    <div> Control LED Thủ công
+			<input type="checkbox" id="led-tc" name="led"  />
+		</div>
+    <div> Set time to turn off LED Phòng Ngủ
+      <input type="time" id="led-pn-off-time">
+    </div>
+        <label class="switch" >
             <span class="sun"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g fill="#ffd43b"><circle r="5" cy="12" cx="12"></circle><path d="m21 13h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2zm-17 0h-1a1 1 0 0 1 0-2h1a1 1 0 0 1 0 2zm13.66-5.66a1 1 0 0 1 -.66-.29 1 1 0 0 1 0-1.41l.71-.71a1 1 0 1 1 1.41 1.41l-.71.71a1 1 0 0 1 -.75.29zm-12.02 12.02a1 1 0 0 1 -.71-.29 1 1 0 0 1 0-1.41l.71-.66a1 1 0 0 1 1.41 1.41l-.71.71a1 1 0 0 1 -.7.24zm6.36-14.36a1 1 0 0 1 -1-1v-1a1 1 0 0 1 2 0v1a1 1 0 0 1 -1 1zm0 17a1 1 0 0 1 -1-1v-1a1 1 0 0 1 2 0v1a1 1 0 0 1 -1 1zm-5.66-14.66a1 1 0 0 1 -.7-.29l-.71-.71a1 1 0 0 1 1.41-1.41l.71.71a1 1 0 0 1 0 1.41 1 1 0 0 1 -.71.29zm12.02 12.02a1 1 0 0 1 -.7-.29l-.66-.71a1 1 0 0 1 1.36-1.36l.71.71a1 1 0 0 1 0 1.41 1 1 0 0 1 -.71.24z"></path></g></svg></span>
             <span class="moon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path d="m223.5 32c-123.5 0-223.5 100.3-223.5 224s100 224 223.5 224c60.6 0 115.5-24.2 155.8-63.4 5-4.9 6.3-12.5 3.1-18.7s-10.1-9.7-17-8.5c-9.8 1.7-19.8 2.6-30.1 2.6-96.9 0-175.5-78.8-175.5-176 0-65.8 36-123.1 89.3-153.3 6.1-3.5 9.2-10.5 7.7-17.3s-7.3-11.9-14.3-12.5c-6.3-.5-12.6-.8-19-.8z"></path></svg></span>   
-            <input type="checkbox" class="input">
+            <input type="checkbox" class="input"id="led-pn">
             <span class="slider"></span>
           </label>
 		<script type="text/javascript">
             var button = document.getElementById('btn');
             var led_pk = document.getElementById('led-pk');
             var led_pn = document.getElementById('led-pn');
+            var led_nn = document.getElementById('led-nn');
+            var ledPnOffTimeInput = document.getElementById('led-pn-off-time');
+            ledPnOffTimeInput.disabled = true;
+            var ledPnOffTime;
+            var ledPnOffTimeChecked = false;
+            led_nn.disabled = true;
+            var led_tc = document.getElementById('led-tc');
+            var led_tc_status = "AUTO"
+
+            ledPnOffTimeInput.onchange = function() {
+              ledPnOffTime = ledPnOffTimeInput.value;
+              ledPnOffTimeChecked = false;
+            }
+            led_tc.onchange = ()=>{
+                if(led_tc.checked){
+                    led_nn.disabled = false;
+                    led_tc_status = "MANUAL"
+                }else {
+                    led_nn.disabled = true;
+                    led_tc_status = "AUTO"
+                }
+                ws.send(JSON.stringify({
+                    ledStatus: led_tc_status
+                }));
+            }
+            
             var url = window.location.host; // hàm trả về url của trang hiện tại kèm theo port
             var sensorValueSpan = document.getElementById('sensor-value');
             var ws = new WebSocket('ws://' + url + '/ws'); // mở 1 websocket với port 8000
@@ -163,15 +198,22 @@
                         led_pk.checked = true; // Nếu trạng thái LED là 'LED_ON', bật đèn LED
                     }
                     if (data.ledStatus == 'LED_OFF_PN') {
-                        led_pn.checked = false; // Nếu trạng thái LED là 'LED_OFF', tắt đèn LED
+                        led_pn.checked = false; 
                     } else if (data.ledStatus == 'LED_ON_PN') {
-                        led_pn.checked = true; // Nếu trạng thái LED là 'LED_ON', bật đèn LED
+                        led_pn.checked = true;
+                    }
+                    if (data.ledStatus == 'LED_OFF_NN') {
+                        led_nn.checked = false; 
+                    } else if (data.ledStatus == 'LED_ON_NN') {
+                        led_nn.checked = true; 
                     }
                 }
             }
             ws.onclose = function() { // hàm này sẽ được thực hiện khi đóng websocket
                 led_pk.disabled = true;
                 led_pn.disabled = true;
+                led_nn.disabled = true;
+                led_tc.disabled = true;
                 document.getElementById('status').innerHTML = 'Connected';
             };
             led_pk.onchange = function() { // thực hiện thay đổi bật/tắt led
@@ -179,15 +221,47 @@
                 if (led_pk.checked) {
                     led_pk_status = 'LED_ON_PK';
                 }
-                ws.send(led_pk_status)
+                ws.send(JSON.stringify({
+                    ledStatus: led_pk_status
+                }));
             }
-            led_pn.onchange = function() { // thực hiện thay đổi bật/tắt led
+            led_pn.onchange = function() {
                 var led_pn_status = 'LED_OFF_PN';
                 if (led_pn.checked) {
                     led_pn_status = 'LED_ON_PN';
+                    ledPnOffTimeInput.disabled = false;
+                }else{
+                   ledPnOffTimeInput.disabled = true;
                 }
-                ws.send(led_pn_status)
+                ws.send(JSON.stringify({
+                    ledStatus: led_pn_status
+                }));
             }
+            led_nn.onchange = function() { 
+                var led_nn_status = 'LED_OFF_NN';
+                if (led_nn.checked) {
+                    led_nn_status = 'LED_ON_NN';
+                }
+                ws.send(JSON.stringify({
+                    ledStatus: led_nn_status
+                }));
+            }
+            
+
+          setInterval(function() {
+              var currentTime = new Date();
+              var offTime = new Date();
+              offTime.setHours(ledPnOffTime.split(':')[0]);
+              offTime.setMinutes(ledPnOffTime.split(':')[1]);
+
+              if (!ledPnOffTimeChecked && currentTime >= offTime) {
+                  ledPnOffTimeChecked = true;
+                  ws.send(JSON.stringify({
+                      ledStatus: 'LED_OFF_PN'
+                  }));
+                  ledPnOffTimeInput.value = '';
+              }
+          }, 1000);
             </script>
 	</body>
 </html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <canvas id="myChart"></canvas>
+
+</body>
+<script>
+    fetch('/api/led-operation-time')
+  .then(response => response.json())
+  .then(data => {
+    // Sort the data array by date
+    data.sort((a, b) => {
+      const dateA = new Date(a._id.year, a._id.month - 1, a._id.day);
+      const dateB = new Date(b._id.year, b._id.month - 1, b._id.day);
+      return dateA - dateB;
+    });
+
+    const { ledPKData, ledPNData } = data.reduce((acc, item) => {
+  if (item._id.ledType === 'LED_PK') {
+    acc.ledPKData.push(item);
+  } else if (item._id.ledType === 'LED_PN') {
+    acc.ledPNData.push(item);
+  }
+  return acc;
+}, { ledPKData: [], ledPNData: [] });
+
+console.log(ledPKData);
+console.log(ledPNData);
+
+
+    const ctx = document.getElementById('myChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'line', // Change this line
+      data: {
+        labels: data.map(item => new Date(item._id.year, item._id.month - 1, item._id.day).toLocaleDateString()),
+        datasets: [{
+          label: 'Thời gian sử dụng đèn phòng ngủ (phút)',
+          data: ledPKData.map(item => item.totalOperationTime / 60000), // Convert milliseconds to minutes
+          fill: false,
+          borderColor: 'rgb(75, 192, 192)', // Change this line
+          tension: 0.1 // Change this line
+        },
+        {
+          label: 'Thời gian sử dụng đèn phòng khách (phút)',
+          data: ledPNData.map(item => item.totalOperationTime / 60000), // Convert milliseconds to minutes
+          fill: false,
+          borderColor: 'rgb(255, 99, 132)', // Change this line
+          tension: 0.1 // Change this line
+        }]
+      }
+    });
+  });
+
+    </script>
+</html>

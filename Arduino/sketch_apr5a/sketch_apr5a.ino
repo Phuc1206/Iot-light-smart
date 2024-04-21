@@ -13,7 +13,7 @@ const int LED_pn = D2;
 const int Sensor_pin = A0;
 // const int BTN = 0;
 bool clientConnect = false;
-
+bool statusSensor = false;
 unsigned long CurrentMillis, PreviousMillis, DataSendingTime = (unsigned long) 1000 * 10;
 // Function to create a JSON object with sensor data
 String createSensorJsonObject(int sensorValue) {
@@ -44,24 +44,44 @@ void webSocketEvent(WStype_t type, uint8_t * payload, size_t length) {
       break;
     case WStype_TEXT:
       Serial.printf("[WSc] get text: %s\n", payload);
-      if (strcmp((char*)payload, "LED_ON_PK") == 0) {
+      {
+      StaticJsonDocument<200> doc;
+      DeserializationError error = deserializeJson(doc, payload);
+      if (error) {
+        Serial.println("Failed to parse JSON");
+      } else {
+        const char* ledStatus = doc["ledStatus"];
+      if (strcmp(ledStatus, "LED_ON_PK") == 0) {
         digitalWrite(LED_pk, HIGH); // Khi client phát sự kiện "LED_ON" thì server sẽ bật LED
-        String jsonData = createLEDStatusJsonObject("LED_ON_PK");
-        webSocket.sendTXT(jsonData.c_str());
-      } else if (strcmp((char*)payload, "LED_OFF_PK") == 0) {
-        digitalWrite(LED_pk, LOW); // Khi client phát sự kiện "LED_OFF" thì server sẽ tắt LED
-        String jsonData = createLEDStatusJsonObject("LED_OFF_PK");
-        webSocket.sendTXT(jsonData.c_str());
-      } else if (strcmp((char*)payload, "LED_ON_PN") == 0) {
-        digitalWrite(LED_pn, HIGH); 
-        String jsonData = createLEDStatusJsonObject("LED_ON_PN");
-        webSocket.sendTXT(jsonData.c_str());
-      } else if (strcmp((char*)payload, "LED_OFF_PN") == 0) {
-        digitalWrite(LED_pn, LOW); 
-        String jsonData = createLEDStatusJsonObject("LED_OFF_PN");
-        webSocket.sendTXT(jsonData.c_str());
+        // String jsonData = createLEDStatusJsonObject("LED_ON_PK");
+        // webSocket.sendTXT(jsonData.c_str());
+        } else if (strcmp(ledStatus, "LED_OFF_PK") == 0) {
+          digitalWrite(LED_pk, LOW); // Khi client phát sự kiện "LED_OFF" thì server sẽ tắt LED
+          // String jsonData = createLEDStatusJsonObject("LED_OFF_PK");
+          // webSocket.sendTXT(jsonData.c_str());
+        } else if (strcmp(ledStatus, "LED_ON_PN") == 0) {
+          digitalWrite(LED_pn, HIGH); 
+          // String jsonData = createLEDStatusJsonObject("LED_ON_PN");
+          // webSocket.sendTXT(jsonData.c_str());
+        } else if (strcmp(ledStatus, "LED_OFF_PN") == 0) {
+          digitalWrite(LED_pn, LOW); 
+          // String jsonData = createLEDStatusJsonObject("LED_OFF_PN");
+          // webSocket.sendTXT(jsonData.c_str());
+        }else if (strcmp(ledStatus, "LED_ON_NN") == 0) {
+          digitalWrite(LED_sensor, HIGH); 
+          // String jsonData = createLEDStatusJsonObject("LED_ON_NN");
+          // webSocket.sendTXT(jsonData.c_str());
+        } else if (strcmp(ledStatus, "LED_OFF_NN") == 0) {
+          digitalWrite(LED_sensor, LOW); 
+          // String jsonData = createLEDStatusJsonObject("LED_OFF_NN");
+          // webSocket.sendTXT(jsonData.c_str());
+        }else if (strcmp(ledStatus, "AUTO") == 0) {
+          statusSensor = false;
+        }else if (strcmp(ledStatus, "MANUAL") == 0) {
+          statusSensor = true;
+        }
       }
-      
+      }
       break;
     case WStype_BIN:
       Serial.printf("[WSc] get binary length: %u\n", length);
@@ -95,22 +115,18 @@ void loop() {
       String jsonData = createSensorJsonObject(sensorValue);
       Serial.println("\n\nSending sensor data (JSON): " + jsonData);
       webSocket.sendTXT(jsonData.c_str());
-      if (sensorValue > 1000){
-        digitalWrite(LED_sensor, HIGH);
-      } else{
-        digitalWrite(LED_sensor, LOW); 
+      if(!statusSensor){
+        if (sensorValue > 1000){
+          digitalWrite(LED_sensor, HIGH);
+          String jsonData = createLEDStatusJsonObject("LED_ON_NN");
+          webSocket.sendTXT(jsonData.c_str());
+        } else{
+          digitalWrite(LED_sensor, LOW); 
+          String jsonData = createLEDStatusJsonObject("LED_OFF_NN");
+          webSocket.sendTXT(jsonData.c_str());
+        }
       }
     }
   }
-
-  // delay(200);
-  // static bool isPressed = false;
-  // if (!isPressed && digitalRead(BTN) == 0) { //Nhấn nút nhấn GPIO0
-  //   isPressed = true;
-  //   webSocket.sendTXT("BTN_PRESSED");
-  // } else if (isPressed && digitalRead(BTN)) { //Nhả nút nhấn GPIO0
-  //   isPressed = false;
-  //   webSocket.sendTXT("BTN_RELEASE");
-  // }
   
 }
