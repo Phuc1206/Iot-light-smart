@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void start() {
-        Request request = new Request.Builder().url("ws://192.168.2.8:3000/ws").build();
+        Request request = new Request.Builder().url("ws://192.168.138.191:3000/ws").build();
         EchoWebSocketListener listener = new EchoWebSocketListener();
         ws = client.newWebSocket(request, listener);
         client.dispatcher().executorService().shutdown();

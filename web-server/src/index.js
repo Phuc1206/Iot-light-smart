@@ -1,22 +1,19 @@
-// var express = require('express');
+const mongoose = require('mongoose');
+var express = require('express');
 var fs = require('fs');
 var url = require('url');
 var http = require('http');
 var WebSocket = require('ws');
-// var app = express();
+var app = express();
 
-// var route = require
+
+const db = require('./config/db');
+
 // function gửi yêu cầu(response) từ phía server hoặc nhận yêu cầu (request) của client gửi lên
-function requestHandler(request, response) {
-    fs.readFile('src/public/index.html', function(error, content) {
-        response.writeHead(200, {
-            'Content-Type': 'text/html'
-        });
-        response.end(content);
-    });
-}
+app.get('/', function(req, res) {
+    res.sendFile(__dirname + '/public/index.html');})
 // create http server
-var server = http.createServer(requestHandler);
+var server = http.createServer(app);
 var ws = new WebSocket.Server({
     server
 });
@@ -30,6 +27,7 @@ function broadcast(socket, data) {
         }
     }
 }
+
 ws.on('connection', function(socket, req) {
     clients.push(socket);
     socket.on('message', function(message) {
