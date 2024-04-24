@@ -206,6 +206,10 @@
                         led_nn.checked = false; 
                     } else if (data.ledStatus == 'LED_ON_NN') {
                         led_nn.checked = true; 
+                    }if (data.ledStatus == 'MANUAL') {
+                        led_nn.checked = false; 
+                    } else if (data.ledStatus == 'AUTO') {
+                        led_nn.checked = true; 
                     }
                 }
             }

@@ -1,35 +1,165 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    >
 
-    <ToggleButton
-        android:id="@+id/button"
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scaleType="centerCrop"
+        android:id="@+id/bgr_main"
+        android:background="@drawable/dem"/>
+
+    <ImageView
+        android:id="@+id/ngoi"
+        android:layout_width="250dp"
+        android:layout_height="100dp"
+        android:background="@drawable/tamgiac"
+        />
+
+    <Button
+        android:id="@+id/btnVoiceSearch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textOff="LED OFF"
-        android:textOn="LED ON"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.468"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.389" />
+        android:backgroundTint="@color/white"
+        android:onClick="startVoiceSearch"
+        android:text="Voice Smart"
+        android:layout_toRightOf="@id/ngoi"
+        android:layout_marginTop="60dp"
+        android:layout_marginLeft="30dp"
+        />
 
-    <TextView
-        android:id="@+id/sensorValue"
-        android:layout_width="wrap_content"
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:id="@+id/PN"
+        android:layout_below="@+id/ngoi"
+        >
+        <ImageView
+            android:id="@+id/pn"
+            android:layout_width="250dp"
+            android:layout_height="200dp"
+            android:background="@drawable/pn"
+            />
+        <androidx.appcompat.widget.SwitchCompat
+            android:layout_toRightOf="@+id/pn"
+            android:layout_centerVertical="true"
+            android:layout_marginLeft="30dp"
+            android:id="@+id/nutPN"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:thumb="@drawable/thumb"
+            app:track="@drawable/track"
+            app:showText="true"
+            android:textOn="ON"
+            android:textOff="OFF"
+            />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:id="@+id/PK"
+        android:layout_below="@+id/PN">
+        <ImageView
+            android:id="@+id/pk"
+            android:layout_width="250dp"
+            android:layout_height="200dp"
+            android:background="@drawable/pk"
+            />
+        <androidx.appcompat.widget.SwitchCompat
+            android:layout_toRightOf="@+id/pk"
+            android:layout_marginLeft="30dp"
+            android:layout_centerVertical="true"
+            android:id="@+id/nutPK"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:thumb="@drawable/thumb"
+            app:track="@drawable/track"
+            app:showText="true"
+            android:textOn="ON"
+            android:textOff="OFF"
+            />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:id="@+id/San"
         android:layout_height="wrap_content"
-        android:text="TextView"
-        app:layout_constraintBottom_toTopOf="@+id/button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.76" />
+        android:layout_below="@+id/PK"
+        >
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:layout_width="250dp"
+            android:layout_height="110dp"
+            android:gravity="center"
+            android:layout_centerVertical="true"
+            android:text="NGOÀI SÂN"
+            android:id="@+id/exx"
+            android:background="#39B83E"
+
+            android:textSize="40dp"
+            />
+        <androidx.appcompat.widget.SwitchCompat
+            android:layout_toRightOf="@+id/exx"
+            android:id="@+id/nutTC"
+            android:layout_marginLeft="30dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:thumb="@drawable/thumb"
+            app:track="@drawable/track"
+            app:showText="true"
+            android:textOn="HAND"
+            android:textOff="AUTO"
+            />
+        <androidx.appcompat.widget.SwitchCompat
+            android:layout_toRightOf="@+id/exx"
+            android:layout_below="@id/nutTC"
+            android:id="@+id/nutNS"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:thumb="@drawable/thumb"
+            app:track="@drawable/track"
+            app:showText="true"
+            android:textOn="ON"
+            android:textOff="OFF"
+            />
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:id="@+id/cua"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/San">
+        <ImageView
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_centerVertical="true"
+            android:background="@drawable/cong"
+            android:id="@+id/cong"
+            android:textSize="40dp"
+            />
+        <androidx.appcompat.widget.SwitchCompat
+            android:layout_toRightOf="@+id/cong"
+            android:layout_below="@id/nutNS"
+            android:id="@+id/nut_cong"
+            android:layout_marginLeft="30dp"
+            android:layout_centerVertical="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:thumb="@drawable/thumb"
+            app:track="@drawable/track"
+            app:showText="true"
+            android:textOn="ON"
+            android:textOff="OFF"
+            />
+    </RelativeLayout>
+</RelativeLayout>
