@@ -45,8 +45,8 @@ app.get('/api/sensor-data', function(req, res) {
     });
 });
 
-app.get('/1', function(req, res) {
-    res.sendFile(__dirname + '/public/index1.html');})
+// app.get('/1', function(req, res) {
+//     res.sendFile(__dirname + '/public/index1.html');})
 
 // function gửi yêu cầu(response) từ phía server hoặc nhận yêu cầu (request) của client gửi lên
 app.get('/', function(req, res) {

@@ -9,7 +9,9 @@ var ledPnOffTime;
 var ledPnOffTimeChecked = false;
 led_nn.disabled = true;
 var led_tc = document.getElementsByName('led-tc')[0];
+var mode_led = document.getElementById('mode-led');
 var led_tc_status = "AUTO"
+mode_led.innerHTML = "AUTO"
 console.log(ledPnOffTimeInput)
             var url = window.location.host; // hàm trả về url của trang hiện tại kèm theo port
             console.log(url)
@@ -98,9 +100,11 @@ console.log(ledPnOffTimeInput)
                   if(led_tc.checked){
                       led_nn.disabled = false;
                       led_tc_status = "MANUAL"
+                      mode_led.innerHTML = "MANUAL";
                   }else {
                       led_nn.disabled = true;
                       led_tc_status = "AUTO"
+                      mode_led.innerHTML = "AUTO";
                   }
                   ws.send(JSON.stringify({
                       ledStatus: led_tc_status
@@ -121,3 +125,6 @@ console.log(ledPnOffTimeInput)
                   ledPnOffTimeInput.value = '';
               }
           }, 1000);
+led_nn.addEventListener('mouseover', function(){
+    this.style.cursor = 'no-drop';
+})
