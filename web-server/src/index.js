@@ -11,7 +11,7 @@ const LedTime = require('./model/LedTime');
 
 const db = require('./config/db/index.db');
 
-
+app.use(express.static(path.join(__dirname, 'public')));
 db.connect();
 app.get('/api/led-operation-time', function(req, res) {
     LedTime.aggregate([
@@ -45,6 +45,8 @@ app.get('/api/sensor-data', function(req, res) {
     });
 });
 
+app.get('/1', function(req, res) {
+    res.sendFile(__dirname + '/public/index1.html');})
 
 // function gửi yêu cầu(response) từ phía server hoặc nhận yêu cầu (request) của client gửi lên
 app.get('/', function(req, res) {
