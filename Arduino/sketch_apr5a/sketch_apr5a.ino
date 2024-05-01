@@ -5,7 +5,7 @@
 WebSocketsClient webSocket;
 const char* ssid = "phuc"; //Đổi thành wifi của bạn
 const char* password = "phuc1206"; //Đổi pass luôn
-const char* ip_host = "192.168.138.191"; //Đổi luôn IP host của PC nha
+const char* ip_host = "192.168.103.191"; //Đổi luôn IP host của PC nha
 const uint16_t port = 3000; //Port thích đổi thì phải đổi ở server nữa
 const int LED_sensor = D4;
 const int LED_pk = D1;

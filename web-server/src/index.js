@@ -8,11 +8,39 @@ var WebSocket = require('ws');
 var app = express();
 const Sensor = require('./model/sensor');
 const LedTime = require('./model/LedTime');
-
+const DoorStatus = require('./model/DoorStatus');
 const db = require('./config/db/index.db');
-
 app.use(express.static(path.join(__dirname, 'public')));
+
 db.connect();
+app.get('/api/doorStatuses', (req, res) => {
+    DoorStatus.find({})
+        .sort({createdAt: -1}) // Sort by createdAt in descending order
+        .limit(30) // Limit to 30 items
+        .then(data => {
+            // Map the data to the desired format
+            let formattedData = data.map(item => {
+                let status;
+                if (item.doorStatus === 'DOOR_OPEN' ) {
+                    status = 'Success';
+                } else if (item.doorStatus === 'DOOR_OPEN_FAIL') {
+                    status = 'Fail';
+                }else if (item.doorStatus === 'DOOR_CLOSE') {
+                    return null
+                }
+
+                return {
+                    status: status,
+                    time: item.createdAt
+                };
+            }).filter(item => item !== null);
+
+            res.json(formattedData);
+        }).catch(err => {
+            res.status(500).send(err);
+        });
+});
+
 app.get('/api/led-operation-time', function(req, res) {
     LedTime.aggregate([
       {
@@ -37,13 +65,17 @@ app.get('/api/led-operation-time', function(req, res) {
 app.get('/chart', function(req, res) {
     res.sendFile(__dirname + '/public/chart.html');})
 app.get('/api/sensor-data', function(req, res) {
-    // Query the database for sensor data
-    Sensor.find({}).then(data => {
-        res.json(data);
-    }).catch(err => {
-        res.status(500).send(err);
-    });
+    // Query the database for the latest 10 sensor data
+    Sensor.find({})
+        .sort({createdAt: -1}) // Sort by createdAt in descending order
+        .limit(10) // Limit to 10 items
+        .then(data => {
+            res.json(data);
+        }).catch(err => {
+            res.status(500).send(err);
+        });
 });
+
 
 // app.get('/1', function(req, res) {
 //     res.sendFile(__dirname + '/public/index1.html');})
@@ -75,6 +107,14 @@ ws.on('connection', function(socket, req) {
         // Parse the incoming message as JSON
         const data = JSON.parse(message);
         // console.log(data);
+        if(data.hasOwnProperty("doorStatus")){
+            const doorStatus = new DoorStatus(data);
+            doorStatus.save().then(() => {
+                // console.log('Sensor data saved to database');
+            }).catch((err) => {
+                // console.error('Error saving sensor data to database:', err);
+            });
+        }
         if (data.hasOwnProperty("sensorValue")) {
             const sensor = new Sensor(data);
             sensor.save().then(() => {

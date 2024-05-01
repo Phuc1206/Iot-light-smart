@@ -1,7 +1,9 @@
 package com.example.myapplication;
 
+import android.app.TimePickerDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -9,8 +11,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.TimePicker;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -43,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int SPEECH_REQUEST_CODE = 100;
     private OkHttpClient client;
     private WebSocket ws;
+    private EditText edtTime;
+    private int hour, minute;
+    private boolean isTimeSet = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +76,20 @@ public class MainActivity extends AppCompatActivity {
         switchCompatCong = findViewById(R.id.nut_cong);
         imageViewPN = findViewById(R.id.pn);
         imageViewPK = findViewById(R.id.pk);
+        edtTime = findViewById(R.id.edtTime);
+
+        minute = calendar.get(Calendar.MINUTE);
+
+        edtTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showTimePickerDialog();
+            }
+        });
+
         switchCompatNS.setEnabled(false);
+
+
 // Lấy trạng thái ban đầu của switchCompatPN và switchCompatPK
         boolean checkpnBANDAU = switchCompatPN.isChecked();
         boolean checkpkBANDAU = switchCompatPK.isChecked();
@@ -137,6 +157,75 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
+
+    }
+
+    private void showTimePickerDialog() {
+        Calendar currentCalendar = Calendar.getInstance();
+
+       int hour = currentCalendar.get(Calendar.HOUR_OF_DAY);
+
+        if(switchCompatPN.isChecked()){
+            TimePickerDialog timePickerDialog = new TimePickerDialog(
+                    this,
+                    android.R.style.Theme_Holo_Light_Dialog,
+
+                    new TimePickerDialog.OnTimeSetListener() {
+
+                        @Override
+                        public void onTimeSet(TimePicker view, int hour, int minute) {
+                            // Do something with the selected time
+                            final String time = String.format("%02d:%02d", hour, minute);
+                            edtTime.setText(time);
+
+                            // Create a handler
+                            final Handler handler = new Handler();
+                            handler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // Get current time
+                                    Calendar currentCalendar = Calendar.getInstance();
+                                    String currentTime = String.format("%02d:%02d", currentCalendar.get(Calendar.HOUR_OF_DAY), currentCalendar.get(Calendar.MINUTE));
+
+                                    // Compare current time with set time
+                                    if (currentTime.equals(time)) {
+                                        edtTime.setText("set time");
+                                        switchCompatPN.setChecked(false);
+                                        JSONObject jsonObject = new JSONObject();
+
+                                        try {
+                                            jsonObject.put("ledStatus", "LED_OFF_PN");
+
+
+                                            // Convert the JSONObject to a string
+                                            String jsonString = jsonObject.toString();
+
+                                            // Send the JSON string
+                                            ws.send(jsonString);
+                                        } catch (JSONException e) {
+                                            e.printStackTrace();
+                                        }
+                                        handler.removeCallbacks(this);  // Stop checking after the time matches
+                                    } else {
+                                        handler.postDelayed(this, 0);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    hour,
+                    minute,
+                    true
+            );
+
+            timePickerDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            timePickerDialog.show();
+
+        } else {
+            // Assuming 'edtTime' is your EditText
+            edtTime.setEnabled(true);
+        }
+
     }
 
     // Phương thức updateBackground để cập nhật nền của imageView dựa trên trạng thái của SwitchCompat
@@ -195,7 +284,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void start() {
-        Request request = new Request.Builder().url("ws://192.168.138.191:3000/ws").build();
+        Request request = new Request.Builder().url("ws://192.168.103.191:3000/ws").build();
         EchoWebSocketListener listener = new EchoWebSocketListener();
         ws = client.newWebSocket(request, listener);
         client.dispatcher().executorService().shutdown();
@@ -204,6 +293,26 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onOpen(WebSocket webSocket, Response response) {
             runOnUiThread(() -> {
+                switchCompatCong.setOnClickListener(v -> {
+                    JSONObject jsonObject = new JSONObject();
+                    try {
+                        // Put the LED status in the JSONObject
+                        if (switchCompatCong.isChecked()) {
+                            jsonObject.put("doorStatus", "DOOR_OPEN");
+                        } else if(switchCompatCong.isChecked()==false){
+                            jsonObject.put("doorStatus", "DOOR_CLOSE");
+                        }
+
+                        // Convert the JSONObject to a string
+                        String jsonString = jsonObject.toString();
+
+                        // Send the JSON string
+                        ws.send(jsonString);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Toast.makeText(MainActivity.this, "Connected to the server", Toast.LENGTH_SHORT).show();
+                });
                 switchCompatPN.setOnClickListener(v -> {
                             JSONObject jsonObject = new JSONObject();
                             try {
@@ -292,6 +401,13 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 try {
                     JSONObject jsonObject = new JSONObject(text);
+                    if (jsonObject.has("doorStatus")) {
+//                        sensorValue.setText(jsonObject.getString("sensorValue"));
+                        if ("DOOR_OPEN".equals(jsonObject.getString("doorStatus"))) {
+                            switchCompatCong.setChecked(true);
+                        }else if ("DOOR_CLOSE".equals(jsonObject.getString("doorStatus"))) {
+                            switchCompatCong.setChecked(false);}
+                    }
                     if (jsonObject.has("sensorValue")) {
 //                        sensorValue.setText(jsonObject.getString("sensorValue"));
                     }

@@ -11,6 +11,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.ListView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,16 +42,33 @@ import okhttp3.Response;
 public class chart extends AppCompatActivity {
     private OkHttpClient client;
 
+    ArrayList<History> listhis;
+    MyAdapterHistory myAdapterHistory;
+
+    String status[] = {"success", "Fail", "Success"};
+    String time[] = {"success", "Fail", "Success"};
+    ListView listView;
+
     private String responseData;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chart);
+
+        listView = findViewById(R.id.lvhistory);
+        listhis = new ArrayList<>();
+
+        for(int i=0; i<status.length;i++){
+            listhis.add(new History(status[i],time[i]));
+        }
+        myAdapterHistory = new MyAdapterHistory(chart.this,R.layout.history_item, listhis);
+        listView.setAdapter(myAdapterHistory);
+
         client = new OkHttpClient();
 
         LineChart chart1 = findViewById(R.id.chart);
 
-        String url = "http://192.168.138.191:3000/api/led-operation-time";
+        String url = "http://192.168.103.191:3000/api/led-operation-time";
 
         Request request = new Request.Builder()
                 .url(url)

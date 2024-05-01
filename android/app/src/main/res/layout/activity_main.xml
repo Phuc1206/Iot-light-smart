@@ -58,6 +58,21 @@
             android:textOn="ON"
             android:textOff="OFF"
             />
+
+        <EditText
+            android:id="@+id/edtTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/nutPN"
+            android:layout_alignStart="@+id/nutPN"
+            android:layout_below="@id/nutPN"
+            android:layout_marginEnd="10dp"
+            android:layout_marginStart="13dp"
+            android:layout_marginTop="13dp"
+            android:textColor="@color/white"
+            android:hint="set time"
+            android:focusable="false"
+            android:clickable="true"/>
     </RelativeLayout>
 
     <RelativeLayout

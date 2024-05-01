@@ -2,7 +2,7 @@ var button = document.getElementById('btn');
 var led_pk = document.getElementById('led-pk');
 var led_pn = document.getElementById('led-pn');
 var led_nn = document.getElementById('led-nn');
-
+var door = document.getElementById('door');
 var ledPnOffTimeInput = document.getElementById('led-pn-off-time');
 ledPnOffTimeInput.disabled = true;
 var ledPnOffTime;
@@ -30,6 +30,13 @@ console.log(ledPnOffTimeInput)
             {
                 console.log(evt.data)
                 var data = JSON.parse(evt.data);
+                if (data.hasOwnProperty("doorStatus")) {
+                    if(data.doorStatus == "DOOR_CLOSE"){
+                        door.checked = false;
+                    }else if(data.doorStatus == "DOOR_OPEN"){
+                        door.checked = true;
+                    } 
+                }
                 if (data.hasOwnProperty("sensorValue")) {
                     sensorValueSpan.innerText = data.sensorValue; // Update sensor value
                 }
@@ -60,6 +67,7 @@ console.log(ledPnOffTimeInput)
                 led_pn.disabled = true;
                 led_nn.disabled = true;
                 led_tc.disabled = true;
+                door.disabled = true;
                 document.getElementById('status').innerHTML = 'Connected';
             };
             led_pk.onchange = function() { // thực hiện thay đổi bật/tắt led
@@ -110,7 +118,15 @@ console.log(ledPnOffTimeInput)
                       ledStatus: led_tc_status
                   }));
               }
-
+              door.onchange = function(){
+                var door_status = 'DOOR_CLOSE';
+                if (door.checked) {
+                    door_status = 'DOOR_OPEN';
+                }
+                ws.send(JSON.stringify({
+                    doorStatus: door_status
+                }));
+              }
           setInterval(function() {
               var currentTime = new Date();
               var offTime = new Date();
@@ -119,12 +135,11 @@ console.log(ledPnOffTimeInput)
 
               if (!ledPnOffTimeChecked && currentTime >= offTime) {
                   ledPnOffTimeChecked = true;
+                  led_pn.checked = false;
                   ws.send(JSON.stringify({
                       ledStatus: 'LED_OFF_PN'
                   }));
                   ledPnOffTimeInput.value = '';
               }
           }, 1000);
-led_nn.addEventListener('mouseover', function(){
-    this.style.cursor = 'no-drop';
-})
+          
