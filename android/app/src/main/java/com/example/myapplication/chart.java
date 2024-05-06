@@ -29,9 +29,14 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -45,8 +50,7 @@ public class chart extends AppCompatActivity {
     ArrayList<History> listhis;
     MyAdapterHistory myAdapterHistory;
 
-    String status[] = {"success", "Fail", "Success"};
-    String time[] = {"success", "Fail", "Success"};
+
     ListView listView;
 
     private String responseData;
@@ -58,14 +62,12 @@ public class chart extends AppCompatActivity {
         listView = findViewById(R.id.lvhistory);
         listhis = new ArrayList<>();
 
-        for(int i=0; i<status.length;i++){
-            listhis.add(new History(status[i],time[i]));
-        }
+
         myAdapterHistory = new MyAdapterHistory(chart.this,R.layout.history_item, listhis);
         listView.setAdapter(myAdapterHistory);
 
         client = new OkHttpClient();
-
+        fetchDoorStatuses();
         LineChart chart1 = findViewById(R.id.chart);
 
         String url = "http://192.168.103.191:3000/api/led-operation-time";
@@ -162,6 +164,53 @@ public class chart extends AppCompatActivity {
                                         });
 
     }
+    private void fetchDoorStatuses() {
+        Request request = new Request.Builder()
+                .url("http://192.168.103.191:3000/api/doorStatuses")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    responseData = response.body().string();
+                    try {
+                        JSONArray jsonArray = new JSONArray(responseData);
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject jsonObject = jsonArray.getJSONObject(i);
+                            String status = jsonObject.getString("status");
+                            String time = jsonObject.getString("time");
+
+                            // Parse and format the time
+                            SimpleDateFormat isoFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
+                            isoFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+                            Date date = isoFormat.parse(time);
+
+                            SimpleDateFormat desiredFormat = new SimpleDateFormat("M/d/yyyy, h:mm:ss a", Locale.US);
+                            desiredFormat.setTimeZone(TimeZone.getTimeZone("GMT+7")); // Change this to your desired timezone
+                            String formattedTime = desiredFormat.format(date);
+
+                            listhis.add(new History(status, formattedTime));
+                        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                myAdapterHistory.notifyDataSetChanged();
+                            }
+                        });
+                    } catch (JSONException | ParseException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+    }
+
     @Override
     public boolean onCreatePanelMenu(int featureId, @NonNull Menu menu) {
         MenuInflater inflater = getMenuInflater();
