@@ -456,7 +456,7 @@ public class MainActivity extends AppCompatActivity {
     public void TextSubmit(String command) {
         // Process the recognized text command here
         if (command != null) {
-            if (command.contains("bật đèn tầng 1") || command.contains("bật đèn lầu trệt")) {
+            if (command.contains("bật đèn phòng khách") || command.contains("mở đèn phòng khách") || command.contains("turn on living room light") ) {
                 updateBackground(true, imageViewPK, R.drawable.pk, R.drawable.pk_off);
                 switchCompatPK.setChecked(true);
                 JSONObject jsonObject = new JSONObject();
@@ -468,7 +468,7 @@ public class MainActivity extends AppCompatActivity {
                 catch (JSONException e) {
                     e.printStackTrace();
                 }
-            } else if (command.contains("tắt đèn tầng 1") || command.contains("tắt đèn lầu trệt")) {
+            } else if (command.contains("tắt đèn phòng khách") || command.contains("đóng đèn phòng khách") || command.contains("turn off living room light") || command.contains("đống đèn phòng khách") || command.contains("Đóng đèn phòng khách") || command.contains("Đống đèn phòng khách")|| command.contains("Tắt đèn phòng khách")) {
                 updateBackground(false, imageViewPK, R.drawable.pk, R.drawable.pk_off);
                 switchCompatPK.setChecked(false);
                 JSONObject jsonObject = new JSONObject();
@@ -480,7 +480,7 @@ public class MainActivity extends AppCompatActivity {
                 catch (JSONException e) {
                     e.printStackTrace();
                 }
-            } else if (command.contains("bật đèn tầng 2") || command.contains("bật đèn lầu 1")) {
+            } else if (command.contains("bật đèn phòng ngủ") || command.contains("mở đèn phòng ngủ")|| command.contains("turn on bedroom light")) {
                 updateBackground(true, imageViewPN, R.drawable.pn, R.drawable.pn_off);
                 switchCompatPN.setChecked(true);
                 JSONObject jsonObject = new JSONObject();
@@ -492,7 +492,7 @@ public class MainActivity extends AppCompatActivity {
                 catch (JSONException e) {
                     e.printStackTrace();
                 }
-            } else if (command.contains("tắt đèn tầng 2") || command.contains("tắt đèn lầu 1")) {
+            } else if (command.contains("tắt đèn phòng ngủ") || command.contains("đóng đèn phòng ngủ")|| command.contains("turn off bedroom light") || command.contains("Tắt đèn phòng ngủ") ) {
                 updateBackground(false, imageViewPN, R.drawable.pn, R.drawable.pn_off);
                 switchCompatPN.setChecked(false);
                 JSONObject jsonObject = new JSONObject();
@@ -506,9 +506,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else if (command.contains("mở cửa") || command.contains("mở cổng")) {
                 switchCompatCong.setChecked(true);
+                JSONObject jsonObject = new JSONObject();
+                try{
+                    jsonObject.put("doorStatus", "DOOR_OPEN");
+                    String jsonString = jsonObject.toString();
+                    ws.send(jsonString);
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
+                }
             } else if (command.contains("đóng cửa") || command.contains("đóng cổng")) {
                 switchCompatCong.setChecked(false);
-            } else if (command.contains("bật đèn ngoài sân")) {
+                JSONObject jsonObject = new JSONObject();
+                try{
+                    jsonObject.put("doorStatus", "DOOR_CLOSE");
+                    String jsonString = jsonObject.toString();
+                    ws.send(jsonString);
+                }
+                catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            } else if (command.contains("bật đèn ngoài sân") || command.contains("mở đèn ngoài sân") || command.contains("turn on outdoor light")) {
                 if (switchTC.isChecked()==false) {
                     Toast.makeText(this, "Chế độ tự động đang được bật, tắt chế độ tự động để thực hiện", Toast.LENGTH_SHORT).show();
                 } else {
