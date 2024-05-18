@@ -21,10 +21,30 @@ console.log(ledPnOffTimeInput)
             console.log('connecting...')
             
             ws.onopen = function() //khi websocket được mở thì hàm này sẽ được thưc hiện
-            {
+            {   
+                console.log('connected to server ws')
                 // document.getElementById('status').innerHTML = 'Connected';
                 //  //khi websocket được mở, mới cho phép
                 // console.log('connected...')
+                var savedLedPkStatus = localStorage.getItem('led_pk_status');
+                var savedLedPnStatus = localStorage.getItem('led_pn_status');
+                var savedLedNnStatus = localStorage.getItem('led_nn_status');
+                var savedLedTcStatus = localStorage.getItem('led_tc_status');
+                if (savedLedPkStatus) {
+                    led_pk.checked = savedLedPkStatus == 'LED_ON_PK';
+                }
+                if (savedLedPnStatus) {
+                    led_pn.checked = savedLedPnStatus == 'LED_ON_PN';
+                }
+                if (savedLedNnStatus) {
+                    led_nn.checked = savedLedNnStatus == 'LED_ON_NN';
+                }
+                if (savedLedTcStatus == 'MANUAL') {
+                    led_tc.checked = savedLedTcStatus == 'MANUAL';
+                    led_nn.disabled = false;
+                    mode_led.innerHTML = "MANUAL";
+                }
+
             };
             ws.onmessage = function(evt) // sự kiện xảy ra khi client nhận dữ liệu từ server
             {
@@ -68,7 +88,6 @@ console.log(ledPnOffTimeInput)
                 led_nn.disabled = true;
                 led_tc.disabled = true;
                 door.disabled = true;
-                document.getElementById('status').innerHTML = 'Connected';
             };
             led_pk.onchange = function() { // thực hiện thay đổi bật/tắt led
                 var led_pk_status = 'LED_OFF_PK';
@@ -78,6 +97,7 @@ console.log(ledPnOffTimeInput)
                 ws.send(JSON.stringify({
                     ledStatus: led_pk_status
                 }));
+                localStorage.setItem('led_pk_status', led_pk_status);
             }
             led_pn.onchange = function() {
                 var led_pn_status = 'LED_OFF_PN';
@@ -90,6 +110,7 @@ console.log(ledPnOffTimeInput)
                 ws.send(JSON.stringify({
                     ledStatus: led_pn_status
                 }));
+                localStorage.setItem('led_pn_status', led_pn_status);
             }
             led_nn.onchange = function() { 
                 var led_nn_status = 'LED_OFF_NN';
@@ -99,6 +120,8 @@ console.log(ledPnOffTimeInput)
                 ws.send(JSON.stringify({
                     ledStatus: led_nn_status
                 }));
+                localStorage.setItem('led_nn_status', led_nn_status);
+
             }
             ledPnOffTimeInput.onchange = function() {
                 ledPnOffTime = ledPnOffTimeInput.value;
@@ -117,6 +140,7 @@ console.log(ledPnOffTimeInput)
                   ws.send(JSON.stringify({
                       ledStatus: led_tc_status
                   }));
+                  localStorage.setItem('led_tc_status', led_tc_status);
               }
               door.onchange = function(){
                 var door_status = 'DOOR_CLOSE';

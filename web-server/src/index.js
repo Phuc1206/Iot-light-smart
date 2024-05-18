@@ -75,7 +75,16 @@ app.get('/api/sensor-data', function(req, res) {
             res.status(500).send(err);
         });
 });
+async function getLastLedOnTime(ledType) {
+    // Truy vấn cơ sở dữ liệu để lấy thời gian bật đèn gần nhất
+    const lastLedOnTime = await LedTime.findOne({ ledType: ledType })
+        .sort({ ledOnTime: -1 }) // Sắp xếp theo ledOnTime giảm dần
+        .select('ledOnTime') // Chỉ lấy trường ledOnTime
+        .lean(); // Chuyển đổi kết quả truy vấn thành một đối tượng JavaScript thuần
 
+    // Chuyển đổi kết quả truy vấn thành một đối tượng Date
+    return new Date(lastLedOnTime.ledOnTime);
+}
 
 // app.get('/1', function(req, res) {
 //     res.sendFile(__dirname + '/public/index1.html');})
@@ -103,7 +112,7 @@ ws.on('connection', function(socket, req) {
     clients.push(socket);
     var ledPKOnTime, ledPKOffTime; 
     var ledPNOnTime, ledPNOffTime;
-    socket.on('message', function(message) {
+    socket.on('message', async function(message) {
         // Parse the incoming message as JSON
         const data = JSON.parse(message);
         // console.log(data);
@@ -131,7 +140,9 @@ ws.on('connection', function(socket, req) {
                 case "LED_OFF_PK":
                     ledPKOffTime = new Date(); // Store the current time when led_pk is turned off
                     console.log('LED_PK turned off at ' + ledPKOffTime);
-
+                    if (isNaN(ledPKOnTime)) {
+                        ledPKOnTime = await getLastLedOnTime("LED_PK");
+                    }
                     // Calculate the operation time of led_pk and save it to the database
                     saveLEDOperationTime(ledPKOnTime, ledPKOffTime, "LED_PK");
                     break;
@@ -142,7 +153,9 @@ ws.on('connection', function(socket, req) {
                 case "LED_OFF_PN":
                     ledPNOffTime = new Date(); // Store the current time when led_pn is turned off
                     console.log('LED_PN turned off at ' + ledPNOffTime);
-
+                    if (isNaN(ledPNOnTime)) {
+                        ledPNOnTime = await getLastLedOnTime("LED_PN");
+                    }
                     // Calculate the operation time of led_pn and save it to the database
                     saveLEDOperationTime(ledPNOnTime, ledPNOffTime, "LED_PN");
                     break;
@@ -156,6 +169,36 @@ ws.on('connection', function(socket, req) {
         var index = clients.indexOf(socket);
         clients.splice(index, 1);
         console.log('disconnected');
+        if (ledPKOnTime && !ledPKOffTime) {
+            // Create a new LEDTime object and save it to the database
+            const ledTime = new LedTime({
+                ledOnTime: ledPKOnTime,
+                ledOffTime: 0, // Set off time to 0
+                ledOperationTime: 0, // Set operation time to 0
+                ledType: "LED_PK"
+            });
+    
+            ledTime.save().then(() => {
+                console.log('LED operation time saved to database');
+            }).catch((err) => {
+                console.error('Error saving LED operation time to database:', err);
+            });
+        }
+        if (ledPNOnTime && !ledPNOffTime) {
+            // Create a new LEDTime object and save it to the database
+            const ledTime = new LedTime({
+                ledOnTime: ledPNOnTime,
+                ledOffTime: 0, // Set off time to 0
+                ledOperationTime: 0, // Set operation time to 0
+                ledType: "LED_PN"
+            });
+    
+            ledTime.save().then(() => {
+                console.log('LED operation time saved to database');
+            }).catch((err) => {
+                console.error('Error saving LED operation time to database:', err);
+            });
+        }
     });
 });
 function saveLEDOperationTime(ledOnTime, ledOffTime, ledType) {

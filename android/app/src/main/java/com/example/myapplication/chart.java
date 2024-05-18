@@ -70,7 +70,7 @@ public class chart extends AppCompatActivity {
         fetchDoorStatuses();
         LineChart chart1 = findViewById(R.id.chart);
 
-        String url = "http://192.168.103.191:3000/api/led-operation-time";
+        String url = "http://192.168.8.68:3000/api/led-operation-time";
 
         Request request = new Request.Builder()
                 .url(url)
@@ -166,7 +166,7 @@ public class chart extends AppCompatActivity {
     }
     private void fetchDoorStatuses() {
         Request request = new Request.Builder()
-                .url("http://192.168.103.191:3000/api/doorStatuses")
+                .url("http://192.168.8.68:3000/api/doorStatuses")
                 .build();
 
         client.newCall(request).enqueue(new Callback() {

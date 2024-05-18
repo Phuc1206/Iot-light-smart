@@ -279,10 +279,8 @@
   <script src="./assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="./assets/js/plugins/chartjs.min.js"></script>
   <script>
-    // Get the table body element
 
 
-// Fetch data from the API
 // Get the table body element
 let tableBody = document.querySelector('.table tbody');
 
@@ -353,7 +351,7 @@ setInterval(updateTable, 5000);
           borderRadius: 4,
           borderSkipped: false,
           backgroundColor: "rgba(255, 255, 255, .8)",
-          data: ledPKData.map(item => item.totalOperationTime ),
+          data: ledPNData.map(item => item.totalOperationTime ),
           maxBarThickness: 6
         }, ],
       },
@@ -429,7 +427,7 @@ setInterval(updateTable, 5000);
       data: {
         labels: [],
         datasets: [{
-          label: "Mobile apps",
+          label: "Sensor Value",
           tension: 0,
           borderWidth: 0,
           pointRadius: 5,
@@ -552,7 +550,7 @@ setInterval(updateTable, 5000);
           borderWidth: 4,
           backgroundColor: "transparent",
           fill: true,
-          data: ledPNData.map(item => item.totalOperationTime ),
+          data: ledPKData.map(item => item.totalOperationTime ),
           maxBarThickness: 6
 
         }],

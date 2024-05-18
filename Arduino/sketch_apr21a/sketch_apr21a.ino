@@ -106,9 +106,15 @@ void startWiFi() {
   Serial.print("Connecting to ");
   Serial.print(WIFI_SSID);
   // Chờ kết nối WiFi được thiết lập
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(1000);
-    Serial.print(".");
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   delay(1000);
+  //   Serial.print(".");
+  // }
+  for(int i=0; i<5; i++){
+    if(WiFi.status() != WL_CONNECTED){
+      Serial.print(".");
+    }
+    delay(2000);
   }
   Serial.println("\n");
   Serial.println("Connection established!");
